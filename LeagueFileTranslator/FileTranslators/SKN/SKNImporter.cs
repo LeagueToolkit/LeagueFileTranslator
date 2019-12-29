@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.Maya.OpenMaya;
+using LeagueFileTranslator.FileTranslators.SKL.IO;
 using LeagueFileTranslator.FileTranslators.SKN;
 using LeagueFileTranslator.FileTranslators.SKN.IO;
 
@@ -19,13 +20,16 @@ namespace LeagueFileTranslator.FileTranslators.SKN
         {
             if (mode == FileAccessMode.kImportAccessMode)
             {
+                string pathWithoutExtension = file.expandedFullName.Substring(0, file.expandedFullName.LastIndexOf('.'));
+
                 SKNFile skn = new SKNFile(file.expandedFullName);
+                SKLFile skl = new SKLFile(pathWithoutExtension + ".skl");
 
                 MGlobal.displayInfo("SKNImporter:reader - SKN Vertex Count: " + skn.Vertices.Count);
                 MGlobal.displayInfo("SKNImporter:reader - SKN Index Count: " + skn.Indices.Count);
                 MGlobal.displayInfo("SKNImporter:reader - SKN Submesh Count: " + skn.Submeshes.Count);
 
-                skn.Load(Path.GetFileNameWithoutExtension(file.expandedFullName));
+                skn.Load(Path.GetFileNameWithoutExtension(file.expandedFullName), skl);
             }
             else
             {

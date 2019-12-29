@@ -1,4 +1,5 @@
 ﻿using Autodesk.Maya.OpenMaya;
+using LeagueFileTranslator.FileTranslators.SKL.IO;
 using LeagueFileTranslator.Structures;
 using System;
 using System.Collections.Generic;
@@ -92,7 +93,7 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
             }
         }
 
-        public void Load(string name)
+        public void Load(string name, SKLFile skl = null)
         {
             MIntArray polygonIndexCounts = new MIntArray((uint)this.Indices.Count / 3);
             MIntArray polygonIndices = new MIntArray((uint)this.Indices.Count);
@@ -208,7 +209,14 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
                 set.addMember(meshDagPath, faceComponent);
             }
 
-            mesh.updateSurface();
+            if(skl == null)
+            {
+                mesh.updateSurface();
+            }
+            else
+            {
+
+            }
         }
 
         private MPlug FindFirstNotConnectedElement(MPlug plug)
