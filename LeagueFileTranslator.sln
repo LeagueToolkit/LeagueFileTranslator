@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.271
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeagueFileTranslator", "LeagueFileTranslator\LeagueFileTranslator.csproj", "{B69424F6-C708-4D49-B88A-AC4436EC25BD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B69424F6-C708-4D49-B88A-AC4436EC25BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B69424F6-C708-4D49-B88A-AC4436EC25BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B69424F6-C708-4D49-B88A-AC4436EC25BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B69424F6-C708-4D49-B88A-AC4436EC25BD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {60B6E89E-4AD0-42D0-BE06-88F16006D437}
+	EndGlobalSection
+EndGlobal
