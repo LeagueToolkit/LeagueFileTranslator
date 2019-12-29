@@ -17,20 +17,19 @@ namespace LeagueFileTranslator.FileTranslators.SKN
 
         public override void reader(MFileObject file, string optionsString, FileAccessMode mode)
         {
-            bool imported = false;
             if (mode == FileAccessMode.kImportAccessMode)
             {
                 SKNFile skn = new SKNFile(file.expandedFullName);
 
-                MGlobal.displayInfo("SKN Vertex Count: " + skn.Vertices.Count);
-                MGlobal.displayInfo("SKN Index Count: " + skn.Indices.Count);
-                MGlobal.displayInfo("SKN Submesh Count: " + skn.Submeshes.Count);
+                MGlobal.displayInfo("SKNImporter:reader - SKN Vertex Count: " + skn.Vertices.Count);
+                MGlobal.displayInfo("SKNImporter:reader - SKN Index Count: " + skn.Indices.Count);
+                MGlobal.displayInfo("SKNImporter:reader - SKN Submesh Count: " + skn.Submeshes.Count);
 
                 skn.Load(Path.GetFileNameWithoutExtension(file.expandedFullName));
             }
             else
             {
-                throw new ArgumentException("Invalid File Access Mode: " + mode, "mode");
+                throw new ArgumentException("SKNImporter:reader - Invalid File Access Mode: " + mode, "mode");
             }
         }
 
