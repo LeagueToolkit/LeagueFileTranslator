@@ -33,5 +33,10 @@ namespace LeagueFileTranslator.Structures
             bw.Write(this.Y);
             bw.Write(this.Z);
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1} {2}", this.X, this.Y, this.Z);
+        }
     }
 }

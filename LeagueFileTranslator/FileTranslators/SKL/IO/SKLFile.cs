@@ -5,17 +5,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.Maya.OpenMaya;
+using Autodesk.Maya.OpenMayaAnim;
 using LeagueFileTranslator.Utilities;
 
 namespace LeagueFileTranslator.FileTranslators.SKL.IO
 {
     public class SKLFile
     {
+        public bool IsLegacy { get; private set; }
+
         public List<SKLJoint> Joints = new List<SKLJoint>();
         public List<short> ShaderJoints = new List<short>();
         public List<short> JointIndices = new List<short>();
         public string Name { get; set; }
         public string AssetName { get; set; }
+
+        public MDagPathArray JointDagPaths = new MDagPathArray();
 
         public SKLFile(string fileLocation) : this(File.OpenRead(fileLocation))
         {
@@ -32,10 +37,12 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
 
                 if (magic == 0x22FD4FC3)
                 {
+                    this.IsLegacy = false;
                     ReadNew(br);
                 }
                 else
                 {
+                    this.IsLegacy = true;
                     ReadLegacy(br);
                 }
             }
@@ -112,8 +119,9 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
 
                 MGlobal.displayInfo("SKNFile - Asset Name: " + this.AssetName);
             }
-        }
 
+            //SwitchHand();
+        }
         private void ReadLegacy(BinaryReader br)
         {
             string magic = Encoding.ASCII.GetString(br.ReadBytes(8));
@@ -141,9 +149,83 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
             if (version == 2)
             {
                 uint jointIndicesCount = br.ReadUInt32();
-                for(int i = 0; i < jointIndicesCount; i++)
+                for (int i = 0; i < jointIndicesCount; i++)
                 {
                     this.JointIndices.Add((short)br.ReadUInt32());
+                }
+            }
+        }
+
+        private void SwitchHand()
+        {
+            for (int i = 0; i < this.Joints.Count; i++)
+            {
+                MMatrix matrix = new MMatrix(this.Joints[i].Transform);
+                MTransformationMatrix transform = new MTransformationMatrix(matrix);
+                MQuaternion rotation = transform.rotation;
+
+                transform.setRotationQuaternion(rotation.x, -rotation.y, -rotation.z, rotation.w);
+                matrix = transform.asMatrixProperty;
+
+                matrix[3, 0] = -matrix[3, 0];
+                for (int j = 0; j < 4; j++)
+                {
+                    for (int k = 0; k < 4; k++)
+                    {
+                        this.Joints[i].Transform[j, k] = (float)matrix[(uint)j, (uint)k];
+                    }
+                }
+            }
+        }
+
+        public void Load()
+        {
+            for (int i = 0; i < this.Joints.Count; i++)
+            {
+                this.Joints[i].ComposeTransform(this.Joints);
+            }
+
+            for (int i = 0; i < this.Joints.Count; i++)
+            {
+                MFnIkJoint ikJoint = new MFnIkJoint();
+                SKLJoint joint = this.Joints[i];
+                MMatrix matrix = new MMatrix(joint.Transform);
+                MTransformationMatrix transformationMatrix = new MTransformationMatrix(matrix);
+
+                ikJoint.create();
+
+                MDagPath jointDagPath = new MDagPath();
+                ikJoint.getPath(jointDagPath);
+                this.JointDagPaths.append(jointDagPath);
+
+                ikJoint.set(transformationMatrix);
+                ikJoint.setName(joint.Name);
+            }
+
+            for (int i = 0; i < this.Joints.Count; i++)
+            {
+                SKLJoint joint = this.Joints[i];
+                if (joint.ParentID == i)
+                {
+                    MGlobal.displayWarning(string.Format("SKLFile:Load - {0} has invalid Parent ID: {1}", joint.Name, joint.ParentID));
+                }
+                else if (joint.ParentID != -1) //Don't need to set up ROOT
+                {
+                    MFnIkJoint ikParentJoint = new MFnIkJoint(this.JointDagPaths[joint.ParentID]);
+                    MFnIkJoint ikChildJoint = new MFnIkJoint(this.JointDagPaths[i]);
+                    MVector position = ikChildJoint.getTranslation(MSpace.Space.kTransform);
+                    MQuaternion rotation = new MQuaternion();
+
+                    ikChildJoint.getRotation(rotation, MSpace.Space.kWorld);
+
+                    MObject childJointObject = ikChildJoint.objectProperty;
+                    ikParentJoint.addChild(childJointObject);
+
+                    if (true)
+                    {
+                        ikChildJoint.setTranslation(position, MSpace.Space.kWorld);
+                        ikChildJoint.setRotation(rotation, MSpace.Space.kWorld);
+                    }
                 }
             }
         }

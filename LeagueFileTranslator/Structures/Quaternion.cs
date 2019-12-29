@@ -87,5 +87,10 @@ namespace LeagueFileTranslator.Structures
                 W = a.W * b.Z + a.X * b.Y - a.Y * b.X + a.Z * b.W
             };
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1} {2} {3}", this.X, this.Y, this.Z, this.W);
+        }
     }
 }

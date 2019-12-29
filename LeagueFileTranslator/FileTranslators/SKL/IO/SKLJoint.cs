@@ -20,6 +20,9 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
         public uint Hash { get; set; }
         public float Radius { get; set; } = 2.1f;
         public string Name { get; set; }
+        public MTransformationMatrix ParentOffset { get; set; }
+        public MTransformationMatrix RootOffset { get; set; }
+        public MTransformationMatrix InverseRootOffset { get; set; }
         public float[,] Transform { get; set; } = new float[4, 4];
 
         public SKLJoint(BinaryReader br, bool isLegacy, short id = 0)
@@ -55,11 +58,12 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 Vector3 parentOffsetTranslation = new Vector3(br);
                 Vector3 parentOffsetScale = new Vector3(br);
                 Quaternion parentOffsetRotation = new Quaternion(br);
-                ComposeTransform(parentOffsetTranslation, parentOffsetRotation);
+                ComposeParentOffset(parentOffsetTranslation, parentOffsetScale, parentOffsetRotation);
 
                 Vector3 inverseRootOffsetTranslation = new Vector3(br);
                 Vector3 inverseRootOffsetScale = new Vector3(br);
                 Quaternion inverseRootOffsetRotation = new Quaternion(br);
+                ComposeInverseRootOffset(inverseRootOffsetTranslation, inverseRootOffsetScale, inverseRootOffsetRotation);
 
                 int nameOffset = br.ReadInt32();
                 long returnOffset = br.BaseStream.Position;
@@ -69,18 +73,22 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 br.BaseStream.Seek(returnOffset, SeekOrigin.Begin);
 
                 PrintInfo();
+                MGlobal.displayInfo(string.Format("ParentOffset - Position: {0}  |  Scale: {1}  |  Rotation: {2}",
+                    parentOffsetTranslation.ToString(), parentOffsetScale.ToString(), parentOffsetRotation.ToString()));
+                MGlobal.displayInfo(string.Format("InverseRootOffset - Position: {0}  |  Scale: {1}  |  Rotation: {2}",
+                    inverseRootOffsetTranslation.ToString(), inverseRootOffsetScale.ToString(), inverseRootOffsetRotation.ToString()));
             }
         }
 
-        private void ComposeTransform(Vector3 translation, Quaternion rotation)
+        public void ComposeTransform(List<SKLJoint> joints)
         {
-            MVector translationVector = new MVector(translation.X, translation.Y, translation.Z);
-            MTransformationMatrix transformationMatrix = new MTransformationMatrix();
+            MMatrix matrix = this.ParentOffset.asMatrixProperty;
 
-            transformationMatrix.setTranslation(translationVector, MSpace.Space.kWorld);
-            transformationMatrix.setRotationQuaternion(rotation.X, rotation.Y, rotation.Z, rotation.W, MSpace.Space.kWorld);
+            if (this.ParentID != -1)
+            {
+                matrix = new MMatrix(joints[this.ParentID].Transform) * this.ParentOffset.asMatrixProperty;
+            }
 
-            MMatrix matrix = transformationMatrix.asMatrix(100);
             for (int i = 0; i < 4; i++)
             {
                 for (int j = 0; j < 4; j++)
@@ -89,6 +97,25 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 }
             }
         }
+        private void ComposeParentOffset(Vector3 translation, Vector3 scale, Quaternion rotation)
+        {
+            MTransformationMatrix transform = new MTransformationMatrix();
+            transform.addTranslation(new MVector(translation.X, translation.Y, translation.Z), MSpace.Space.kTransform);
+            transform.addRotationQuaternion(rotation.X, rotation.Y, rotation.Z, rotation.W, MSpace.Space.kTransform);
+            transform = new MTransformationMatrix(transform.asMatrixInverse);
+
+            this.ParentOffset = transform;
+        }
+        private void ComposeInverseRootOffset(Vector3 translation, Vector3 scale, Quaternion rotation)
+        {
+            MTransformationMatrix transform = new MTransformationMatrix();
+            transform.addTranslation(new MVector(translation.X, translation.Y, translation.Z), MSpace.Space.kTransform);
+            transform.addRotationQuaternion(rotation.X, rotation.Y, rotation.Z, rotation.W, MSpace.Space.kTransform);
+            transform.addScale(new double[] { scale.X, scale.Y, scale.Z }, MSpace.Space.kTransform);
+
+            this.InverseRootOffset = transform;
+        }
+
 
         public void PrintInfo()
         {

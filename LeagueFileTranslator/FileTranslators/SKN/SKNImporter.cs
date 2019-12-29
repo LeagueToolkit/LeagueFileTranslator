@@ -29,6 +29,7 @@ namespace LeagueFileTranslator.FileTranslators.SKN
                 MGlobal.displayInfo("SKNImporter:reader - SKN Index Count: " + skn.Indices.Count);
                 MGlobal.displayInfo("SKNImporter:reader - SKN Submesh Count: " + skn.Submeshes.Count);
 
+                skl.Load();
                 skn.Load(Path.GetFileNameWithoutExtension(file.expandedFullName), skl);
             }
             else
