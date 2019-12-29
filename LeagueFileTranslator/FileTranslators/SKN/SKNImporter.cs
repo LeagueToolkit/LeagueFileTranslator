@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,8 @@ namespace LeagueFileTranslator.FileTranslators.SKN
                 MGlobal.displayInfo("SKN Vertex Count: " + skn.Vertices.Count);
                 MGlobal.displayInfo("SKN Index Count: " + skn.Indices.Count);
                 MGlobal.displayInfo("SKN Submesh Count: " + skn.Submeshes.Count);
+
+                skn.Load(Path.GetFileNameWithoutExtension(file.expandedFullName));
             }
             else
             {

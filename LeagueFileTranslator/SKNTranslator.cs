@@ -9,7 +9,7 @@ using LeagueFileTranslator;
 
 [assembly: MPxFileTranslatorClass(typeof(LeagueFileTranslator.SKNTranslator), "SKN Translator", "", "", "")]
 namespace LeagueFileTranslator
-{ 
+{
     public class SKNTranslator : MPxFileTranslator
     {
 

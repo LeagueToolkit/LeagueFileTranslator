@@ -73,13 +73,7 @@
     <Compile Include="FileTranslators\SKN\IO\SKNSubmesh.cs" />
     <Compile Include="FileTranslators\SKN\IO\SKNVertex.cs" />
     <Compile Include="FileTranslators\SKN\SKNImporter.cs" />
-    <Compile Include="myCommand.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>myCommand.resx</DependentUpon>
-    </Compile>
     <Compile Include="LeagueFIleTranslatorPlugin.cs" />
-    <Compile Include="myCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SKNTranslator.cs" />
     <Compile Include="Structures\R3DBox.cs" />
@@ -87,13 +81,6 @@
     <Compile Include="Structures\Vector2.cs" />
     <Compile Include="Structures\Vector3.cs" />
     <Compile Include="Structures\ColorRGBA4B.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="myCommand.resx">
-      <DependentUpon>myCommand.cs</DependentUpon>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>myCommand.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
