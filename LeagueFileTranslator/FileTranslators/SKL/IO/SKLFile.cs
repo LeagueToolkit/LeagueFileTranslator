@@ -15,8 +15,8 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
         public bool IsLegacy { get; private set; }
 
         public List<SKLJoint> Joints = new List<SKLJoint>();
-        public List<short> ShaderJoints = new List<short>();
-        public List<short> JointIndices = new List<short>();
+        public List<short> Influences = new List<short>();
+        public Dictionary<uint, short> JointIndices = new Dictionary<uint, short>();
         public string Name { get; set; }
         public string AssetName { get; set; }
 
@@ -61,10 +61,10 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
 
             ushort flags = br.ReadUInt16();
             ushort jointCount = br.ReadUInt16();
-            uint shaderJointCount = br.ReadUInt32();
+            uint influencesCount = br.ReadUInt32();
             int jointsOffset = br.ReadInt32();
             int jointIndicesOffset = br.ReadInt32();
-            int shaderJointsOffset = br.ReadInt32();
+            int influencesOffset = br.ReadInt32();
             int nameOffset = br.ReadInt32();
             int assetNameOffset = br.ReadInt32();
             int boneNamesOffset = br.ReadInt32();
@@ -84,13 +84,13 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 }
             }
 
-            if (shaderJointsOffset > 0 && shaderJointCount != 0)
+            if (influencesOffset > 0 && influencesCount != 0)
             {
-                br.BaseStream.Seek(shaderJointsOffset, SeekOrigin.Begin);
+                br.BaseStream.Seek(influencesOffset, SeekOrigin.Begin);
 
-                for (int i = 0; i < shaderJointCount; i++)
+                for (int i = 0; i < influencesCount; i++)
                 {
-                    this.ShaderJoints.Add(br.ReadInt16());
+                    this.Influences.Add(br.ReadInt16());
                 }
             }
 
@@ -100,7 +100,11 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
 
                 for (int i = 0; i < jointCount; i++)
                 {
-                    this.JointIndices.Add(br.ReadInt16());
+                    short index = br.ReadInt16();
+                    br.ReadInt16(); //pad
+                    uint hash = br.ReadUInt32();
+
+                    this.JointIndices.Add(hash, index);
                 }
             }
 
@@ -120,7 +124,7 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 MGlobal.displayInfo("SKNFile - Asset Name: " + this.AssetName);
             }
 
-            //SwitchHand();
+            SwitchHand();
         }
         private void ReadLegacy(BinaryReader br)
         {
@@ -148,10 +152,17 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
 
             if (version == 2)
             {
-                uint jointIndicesCount = br.ReadUInt32();
-                for (int i = 0; i < jointIndicesCount; i++)
+                uint influencesCount = br.ReadUInt32();
+                for (int i = 0; i < influencesCount; i++)
                 {
-                    this.JointIndices.Add((short)br.ReadUInt32());
+                    this.Influences.Add((short)br.ReadUInt32());
+                }
+            }
+            else if (version == 1)
+            {
+                for (int i = 0; i < this.Joints.Count; i++)
+                {
+                    this.Influences.Add((short)i);
                 }
             }
         }
@@ -160,37 +171,33 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
         {
             for (int i = 0; i < this.Joints.Count; i++)
             {
-                MMatrix matrix = new MMatrix(this.Joints[i].Transform);
+                MMatrix matrix = this.Joints[i].Local.asMatrixProperty;
                 MTransformationMatrix transform = new MTransformationMatrix(matrix);
+
                 MQuaternion rotation = transform.rotation;
-
                 transform.setRotationQuaternion(rotation.x, -rotation.y, -rotation.z, rotation.w);
-                matrix = transform.asMatrixProperty;
 
+                matrix = transform.asMatrixProperty;
                 matrix[3, 0] = -matrix[3, 0];
-                for (int j = 0; j < 4; j++)
-                {
-                    for (int k = 0; k < 4; k++)
-                    {
-                        this.Joints[i].Transform[j, k] = (float)matrix[(uint)j, (uint)k];
-                    }
-                }
+
+                this.Joints[i].Local = new MTransformationMatrix(matrix);
             }
         }
 
         public void Load()
         {
-            for (int i = 0; i < this.Joints.Count; i++)
+            if(!IsLegacy)
             {
-                this.Joints[i].ComposeTransform(this.Joints);
+                for (int i = 0; i < this.Joints.Count; i++)
+                {
+                    this.Joints[i].ComposeTransform(this.Joints);
+                }
             }
 
             for (int i = 0; i < this.Joints.Count; i++)
             {
                 MFnIkJoint ikJoint = new MFnIkJoint();
                 SKLJoint joint = this.Joints[i];
-                MMatrix matrix = new MMatrix(joint.Transform);
-                MTransformationMatrix transformationMatrix = new MTransformationMatrix(matrix);
 
                 ikJoint.create();
 
@@ -198,7 +205,7 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 ikJoint.getPath(jointDagPath);
                 this.JointDagPaths.append(jointDagPath);
 
-                ikJoint.set(transformationMatrix);
+                ikJoint.set(joint.Global);
                 ikJoint.setName(joint.Name);
             }
 
@@ -213,16 +220,15 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 {
                     MFnIkJoint ikParentJoint = new MFnIkJoint(this.JointDagPaths[joint.ParentID]);
                     MFnIkJoint ikChildJoint = new MFnIkJoint(this.JointDagPaths[i]);
-                    MVector position = ikChildJoint.getTranslation(MSpace.Space.kTransform);
-                    MQuaternion rotation = new MQuaternion();
+                    ikParentJoint.addChild(ikChildJoint.objectProperty);
 
-                    ikChildJoint.getRotation(rotation, MSpace.Space.kWorld);
-
-                    MObject childJointObject = ikChildJoint.objectProperty;
-                    ikParentJoint.addChild(childJointObject);
-
-                    if (true)
+                    if (this.IsLegacy)
                     {
+                        MVector position = ikChildJoint.getTranslation(MSpace.Space.kTransform);
+                        MQuaternion rotation = new MQuaternion();
+
+                        ikChildJoint.getRotation(rotation, MSpace.Space.kWorld);
+
                         ikChildJoint.setTranslation(position, MSpace.Space.kWorld);
                         ikChildJoint.setRotation(rotation, MSpace.Space.kWorld);
                     }

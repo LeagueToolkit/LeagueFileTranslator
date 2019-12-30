@@ -1,4 +1,5 @@
 ﻿using Autodesk.Maya.OpenMaya;
+using Autodesk.Maya.OpenMayaAnim;
 using LeagueFileTranslator.FileTranslators.SKL.IO;
 using LeagueFileTranslator.Structures;
 using System;
@@ -146,7 +147,6 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
             MItDependencyNodes itDependencyNodes = new MItDependencyNodes(MFn.Type.kPartition);
             MFnPartition renderPartition = new MFnPartition();
             bool foundRenderPartition = false;
-            MGlobal.displayInfo("SKNFile:Load - IsDone: " + itDependencyNodes.isDone);
             for (; !itDependencyNodes.isDone; itDependencyNodes.next())
             {
                 renderPartition.setObject(itDependencyNodes.thisNode);
@@ -209,13 +209,93 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
                 set.addMember(meshDagPath, faceComponent);
             }
 
-            if(skl == null)
+            if (skl == null)
             {
                 mesh.updateSurface();
             }
             else
             {
+                MFnSkinCluster skinCluster = new MFnSkinCluster();
+                MSelectionList selectionList = new MSelectionList();
 
+                selectionList.add(meshDagPath);
+                for (int i = 0; i < skl.Influences.Count; i++)
+                {
+                    short jointIndex = skl.Influences[i];
+                    SKLJoint joint = skl.Joints[jointIndex];
+                    selectionList.add(skl.JointDagPaths[jointIndex]);
+
+                    MGlobal.displayInfo(string.Format("SKNFile:Load:Bind - Added joint [{0}] {1} to binding selection", joint.ID, joint.Name));
+                }
+
+                MGlobal.selectCommand(selectionList);
+                MGlobal.executeCommand("skinCluster -mi 4 -tsb -n skinCluster_" + name);
+
+                MPlug inMeshPlug = mesh.findPlug("inMesh");
+                MPlugArray inMeshConnections = new MPlugArray();
+                inMeshPlug.connectedTo(inMeshConnections, true, false);
+
+                if (inMeshConnections.length == 0)
+                {
+                    MGlobal.displayError("SKNFile:Load:Bind - Failed to find the created Skin Cluster");
+                    throw new Exception("SKNFile:Load:Bind - Failed to find the created Skin Cluster");
+                }
+
+                MPlug outputGeometryPlug = inMeshConnections[0];
+                MDagPathArray influencesDagPaths = new MDagPathArray();
+
+                skinCluster.setObject(outputGeometryPlug.node);
+                skinCluster.influenceObjects(influencesDagPaths);
+
+                MIntArray influenceIndices = new MIntArray((uint)skl.Influences.Count);
+                for (int i = 0; i < skl.Influences.Count; i++)
+                {
+                    MDagPath influencePath = skl.JointDagPaths[skl.Influences[i]];
+
+                    for (int j = 0; j < skl.Influences.Count; j++)
+                    {
+                        if (influencesDagPaths[j].partialPathName == influencePath.partialPathName)
+                        {
+                            influenceIndices[i] = j;
+                            MGlobal.displayInfo("SKNReader:Load:Bind - Added Influence Joint: " + i + " -> " + j);
+                            break;
+                        }
+                    }
+                }
+
+                MFnSingleIndexedComponent singleIndexedComponent = new MFnSingleIndexedComponent();
+                MObject vertexComponent = singleIndexedComponent.create(MFn.Type.kMeshVertComponent);
+                MIntArray groupVertexIndices = new MIntArray((uint)this.Vertices.Count);
+
+                for (int i = 0; i < this.Vertices.Count; i++)
+                {
+                    groupVertexIndices[i] = i;
+                }
+                singleIndexedComponent.addElements(groupVertexIndices);
+
+                MGlobal.executeCommand(string.Format("setAttr {0}.normalizeWeights 0", skinCluster.name));
+
+                MDoubleArray weights = new MDoubleArray((uint)(this.Vertices.Count * skl.Influences.Count));
+                for (int i = 0; i < this.Vertices.Count; i++)
+                {
+                    SKNVertex vertex = this.Vertices[i];
+
+                    for (int j = 0; j < 4; j++)
+                    {
+                        double weight = vertex.Weights[j];
+                        int influence = vertex.BoneIndices[j];
+
+                        if (weight != 0)
+                        {
+                            weights[(i * skl.Influences.Count) + influence] = weight;
+                        }
+                    }
+                }
+
+                skinCluster.setWeights(meshDagPath, vertexComponent, influenceIndices, weights, false);
+                MGlobal.executeCommand(string.Format("setAttr {0}.normalizeWeights 1", skinCluster.name));
+                MGlobal.executeCommand(string.Format("skinPercent -normalize true {0} {1}", skinCluster.name, mesh.name));
+                mesh.updateSurface();
             }
         }
 

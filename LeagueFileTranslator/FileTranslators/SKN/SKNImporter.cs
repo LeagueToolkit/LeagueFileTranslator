@@ -21,6 +21,7 @@ namespace LeagueFileTranslator.FileTranslators.SKN
             if (mode == FileAccessMode.kImportAccessMode)
             {
                 string pathWithoutExtension = file.expandedFullName.Substring(0, file.expandedFullName.LastIndexOf('.'));
+                string name = Path.GetFileNameWithoutExtension(file.expandedFullName).Replace('.', '_');
 
                 SKNFile skn = new SKNFile(file.expandedFullName);
                 SKLFile skl = new SKLFile(pathWithoutExtension + ".skl");
@@ -30,7 +31,7 @@ namespace LeagueFileTranslator.FileTranslators.SKN
                 MGlobal.displayInfo("SKNImporter:reader - SKN Submesh Count: " + skn.Submeshes.Count);
 
                 skl.Load();
-                skn.Load(Path.GetFileNameWithoutExtension(file.expandedFullName), skl);
+                skn.Load(name, skl);
             }
             else
             {
