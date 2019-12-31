@@ -69,6 +69,9 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FileTranslators\SCB\IO\SCBFace.cs" />
+    <Compile Include="FileTranslators\SCB\IO\SCBFile.cs" />
+    <Compile Include="FileTranslators\SCB\SCBImporter.cs" />
     <Compile Include="FileTranslators\SKL\IO\SKLFile.cs" />
     <Compile Include="FileTranslators\SKL\IO\SKLJoint.cs" />
     <Compile Include="FileTranslators\SKN\IO\SKNFile.cs" />
@@ -85,6 +88,8 @@
     <Compile Include="Structures\Vector2.cs" />
     <Compile Include="Structures\Vector3.cs" />
     <Compile Include="Structures\ColorRGBA4B.cs" />
+    <Compile Include="Structures\Vector3b.cs" />
+    <Compile Include="Structures\Vector4b.cs" />
     <Compile Include="Utilities\Text.cs" />
   </ItemGroup>
   <ItemGroup>
