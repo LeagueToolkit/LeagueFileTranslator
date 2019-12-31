@@ -1,4 +1,4 @@
-
+![](https://github.com/LoL-Fantome/LeagueFileTranslator/blob/master/images/leaguefiletranslatorbanner.png)
 
 # Introduction
 LeagueFileTranslator is a plugin for Maya 2019 that allows you to import and export League of Legends models, animations and more.
