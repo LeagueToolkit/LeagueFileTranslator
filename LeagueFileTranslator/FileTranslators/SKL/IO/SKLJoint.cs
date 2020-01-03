@@ -100,9 +100,9 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
         private void ComposeLocal(Vector3 translation, Vector3 scale, Quaternion rotation)
         {
             MTransformationMatrix transform = new MTransformationMatrix();
-            transform.setTranslation(new MVector(translation.X, translation.Y, translation.Z), MSpace.Space.kTransform);
-            transform.setRotationQuaternion(rotation.X, rotation.Y, rotation.Z, rotation.W, MSpace.Space.kTransform);
-            transform.setScale(new double[] { scale.X, scale.Y, scale.Z }, MSpace.Space.kTransform);
+            transform.setTranslation(new MVector(translation.X, translation.Y, translation.Z), MSpace.Space.kWorld);
+            transform.setRotationQuaternion(rotation.X, rotation.Y, rotation.Z, rotation.W, MSpace.Space.kWorld);
+            transform.setScale(new double[] { scale.X, scale.Y, scale.Z }, MSpace.Space.kWorld);
 
             this.Local = transform;
         }

@@ -124,7 +124,7 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 MGlobal.displayInfo("SKNFile - Asset Name: " + this.AssetName);
             }
 
-            SwitchHand();
+            //SwitchHand();
         }
         private void ReadLegacy(BinaryReader br)
         {
@@ -205,7 +205,7 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 ikJoint.getPath(jointDagPath);
                 this.JointDagPaths.append(jointDagPath);
 
-                ikJoint.set(joint.Global);
+                ikJoint.set(joint.IsLegacy ? joint.Global : joint.Local);
                 ikJoint.setName(joint.Name);
             }
 
