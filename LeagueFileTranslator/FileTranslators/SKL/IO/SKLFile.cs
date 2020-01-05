@@ -79,6 +79,8 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
             int reservedOffset4 = br.ReadInt32();
             int reservedOffset5 = br.ReadInt32();
 
+            MGlobal.displayInfo(string.Format("{0} {1} {2} {3} {4}", jointCount, influencesCount, jointsOffset, influencesOffset, jointIndicesOffset));
+
             if (jointsOffset > 0 && jointCount != 0) //wesmart
             {
                 br.BaseStream.Seek(jointsOffset, SeekOrigin.Begin);
@@ -107,6 +109,7 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                     br.ReadInt16(); //pad
                     uint hash = br.ReadUInt32();
 
+                    MGlobal.displayInfo(string.Format("{0} {1}", hash, index));
                     this.JointIndices.Add(hash, index);
                 }
             }
@@ -192,8 +195,8 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 int jointNamesOffset = jointIndicesOffset + jointIndicesSectonSize;
 
                 bw.Write(jointsOffset); //Joints Offset
-                bw.Write(influencesOffset);
                 bw.Write(jointIndicesOffset);
+                bw.Write(influencesOffset);
                 bw.Write(0); //Name offset
                 bw.Write(0); //Asset Name offset
                 bw.Write(jointNamesOffset);
@@ -270,11 +273,14 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 {
                     MFnIkJoint parentJoint = new MFnIkJoint(ikJoint.parent(0));
 
+                    MGlobal.displayInfo(string.Format("Found parent [{0}] ", i));
+
                     //Find index of parent
                     for (int j = 0; j < this.JointDagPaths.Count; j++)
                     {
-                        if (parentJoint.dagPath == this.JointDagPaths[j])
+                        if (parentJoint.dagPath.equalEqual(this.JointDagPaths[j]))
                         {
+                            MGlobal.displayInfo(string.Format("Found parent dag: [{0}] -> [{1}]", i, j));
                             this.Joints[i].ParentID = (short)j;
                         }
                     }
