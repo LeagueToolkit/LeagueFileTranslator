@@ -254,7 +254,7 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 MDagPath jointDagPath = new MDagPath();
 
                 jointIterator.getPath(jointDagPath);
-                this.JointDagPaths.append(jointDagPath);
+                this.JointDagPaths.Add(jointDagPath);
                 ikJoint.setObject(jointDagPath);
 
                 MTransformationMatrix local = new MTransformationMatrix(jointDagPath.exclusiveMatrix);
@@ -272,13 +272,15 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 if (ikJoint.parentCount == 1 && ikJoint.parent(0).apiType == MFn.Type.kJoint)
                 {
                     MFnIkJoint parentJoint = new MFnIkJoint(ikJoint.parent(0));
-
-                    MGlobal.displayInfo(string.Format("Found parent [{0}] ", i));
+                    MDagPath parentDagPath = new MDagPath();
+                    
+                    parentJoint.getPath(parentDagPath);
 
                     //Find index of parent
                     for (int j = 0; j < this.JointDagPaths.Count; j++)
                     {
-                        if (parentJoint.dagPath.equalEqual(this.JointDagPaths[j]))
+                        MGlobal.displayInfo(parentDagPath.fullPathName);
+                        if (parentDagPath.equalEqual(this.JointDagPaths[j]))
                         {
                             MGlobal.displayInfo(string.Format("Found parent dag: [{0}] -> [{1}]", i, j));
                             this.Joints[i].ParentID = (short)j;

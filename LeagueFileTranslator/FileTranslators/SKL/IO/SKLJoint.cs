@@ -115,16 +115,16 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
 
             void WriteLocal()
             {
-                MVector translation = this.Local.getTranslation(MSpace.Space.kWorld);
+                MVector translation = this.Local.getTranslation(MSpace.Space.kTransform);
 
                 double rotationX = 0;
                 double rotationY = 0;
                 double rotationZ = 0;
                 double rotationW = 0;
-                this.Local.getRotationQuaternion(ref rotationX, ref rotationY, ref rotationZ, ref rotationW, MSpace.Space.kWorld);
+                this.Local.getRotationQuaternion(ref rotationX, ref rotationY, ref rotationZ, ref rotationW, MSpace.Space.kTransform);
 
                 double[] scale = new double[3];
-                this.Local.getScale(scale, MSpace.Space.kWorld);
+                this.Local.getScale(scale, MSpace.Space.kTransform);
 
                 //Who the fuck designed this stupid API
                 new Vector3((float)translation.x, (float)translation.y, (float)translation.z).Write(bw);
