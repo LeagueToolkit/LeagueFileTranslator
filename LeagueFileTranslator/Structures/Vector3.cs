@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace LeagueFileTranslator.Structures
 {
@@ -25,6 +26,11 @@ namespace LeagueFileTranslator.Structures
             this.X = br.ReadSingle();
             this.Y = br.ReadSingle();
             this.Z = br.ReadSingle();
+        }
+
+        public static float Distance(Vector3 x, Vector3 y)
+        {
+            return (float)Math.Sqrt(Math.Pow(x.X - y.X, 2) - Math.Pow(x.Y - y.Y, 2) - Math.Pow(x.Z - y.Z, 2));
         }
 
         public void Write(BinaryWriter bw)

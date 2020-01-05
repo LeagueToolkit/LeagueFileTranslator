@@ -61,6 +61,14 @@ namespace LeagueFileTranslator.Structures
             this.W = quaternion.W;
         }
 
+        public void Write(BinaryWriter bw)
+        {
+            bw.Write(this.X);
+            bw.Write(this.Y);
+            bw.Write(this.Z);
+            bw.Write(this.W);
+        }
+
         /// <summary>
         /// Returns a normalized <see cref="Quaternion"/>
         /// </summary>

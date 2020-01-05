@@ -77,10 +77,10 @@
     <Compile Include="FileTranslators\SKN\IO\SKNFile.cs" />
     <Compile Include="FileTranslators\SKN\IO\SKNSubmesh.cs" />
     <Compile Include="FileTranslators\SKN\IO\SKNVertex.cs" />
+    <Compile Include="FileTranslators\SKN\SKNExporter.cs" />
     <Compile Include="FileTranslators\SKN\SKNImporter.cs" />
     <Compile Include="LeagueFIleTranslatorPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SKNTranslator.cs" />
     <Compile Include="Structures\Quaternion.cs" />
     <Compile Include="Structures\R3DBox.cs" />
     <Compile Include="Structures\R3DMatrix.cs" />
@@ -90,6 +90,7 @@
     <Compile Include="Structures\ColorRGBA4B.cs" />
     <Compile Include="Structures\Vector3b.cs" />
     <Compile Include="Structures\Vector4b.cs" />
+    <Compile Include="Utilities\ELF.cs" />
     <Compile Include="Utilities\Text.cs" />
   </ItemGroup>
   <ItemGroup>

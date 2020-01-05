@@ -24,6 +24,19 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
         public MTransformationMatrix Global { get; set; }
         public MTransformationMatrix InverseGlobal { get; set; }
 
+        public SKLJoint(short id, string name, MTransformationMatrix local, MTransformationMatrix inverseGlobal)
+        {
+            this.IsLegacy = false;
+
+            this.Flags = 0;
+            this.ID = id;
+            this.Name = name;
+            this.Hash = ELF.Hash(name);
+            this.Local = local;
+            this.InverseGlobal = inverseGlobal;
+
+            PrintInfo();
+        }
         public SKLJoint(BinaryReader br, bool isLegacy, short id = 0)
         {
             this.IsLegacy = isLegacy;
@@ -33,8 +46,7 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 this.ID = id;
                 this.Name = Encoding.ASCII.GetString(br.ReadBytes(32)).Replace("\0", "");
                 this.ParentID = (short)br.ReadInt32();
-                this.Radius = br.ReadSingle();
-
+                float scale = br.ReadSingle();
                 float[,] transform = new float[4, 4];
                 transform[0, 3] = 0;
                 transform[1, 3] = 0;
@@ -86,17 +98,59 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
             }
         }
 
-        public void ComposeTransform(List<SKLJoint> joints)
+        public void Write(BinaryWriter bw, int nameOffset)
         {
-            if (this.ParentID != -1)
+            if (!this.IsLegacy)
             {
-                this.Global = new MTransformationMatrix(joints[this.ParentID].Global.asMatrixProperty * this.Local.asMatrixProperty);
+                bw.Write(this.Flags);
+                bw.Write(this.ID);
+                bw.Write(this.ParentID);
+                bw.Write((ushort)0);
+                bw.Write(this.Hash);
+                bw.Write(this.Radius);
+                WriteLocal();
+                WriteInverseGlobal();
+                bw.Write(nameOffset - (int)bw.BaseStream.Position);
             }
-            else
+
+            void WriteLocal()
             {
-                this.Global = this.Local;
+                MVector translation = this.Local.getTranslation(MSpace.Space.kWorld);
+
+                double rotationX = 0;
+                double rotationY = 0;
+                double rotationZ = 0;
+                double rotationW = 0;
+                this.Local.getRotationQuaternion(ref rotationX, ref rotationY, ref rotationZ, ref rotationW, MSpace.Space.kWorld);
+
+                double[] scale = new double[3];
+                this.Local.getScale(scale, MSpace.Space.kWorld);
+
+                //Who the fuck designed this stupid API
+                new Vector3((float)translation.x, (float)translation.y, (float)translation.z).Write(bw);
+                new Vector3((float)scale[0], (float)scale[1], (float)scale[2]).Write(bw);
+                new Quaternion((float)rotationX, (float)rotationY, (float)rotationZ, (float)rotationW).Write(bw);
+            }
+            void WriteInverseGlobal()
+            {
+                MVector translation = this.InverseGlobal.getTranslation(MSpace.Space.kWorld);
+
+                double rotationX = 0;
+                double rotationY = 0;
+                double rotationZ = 0;
+                double rotationW = 0;
+                this.InverseGlobal.getRotationQuaternion(ref rotationX, ref rotationY, ref rotationZ, ref rotationW, MSpace.Space.kWorld);
+
+                double[] scale = new double[3];
+                this.InverseGlobal.getScale(scale, MSpace.Space.kWorld);
+
+                //Who the fuck designed this stupid API
+                new Vector3((float)translation.x, (float)translation.y, (float)translation.z).Write(bw);
+                new Vector3((float)scale[0], (float)scale[1], (float)scale[2]).Write(bw);
+                new Quaternion((float)rotationX, (float)rotationY, (float)rotationZ, (float)rotationW).Write(bw);
             }
         }
+
         private void ComposeLocal(Vector3 translation, Vector3 scale, Quaternion rotation)
         {
             MTransformationMatrix transform = new MTransformationMatrix();
@@ -115,7 +169,6 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
 
             this.InverseGlobal = transform;
         }
-
 
         public void PrintInfo()
         {
