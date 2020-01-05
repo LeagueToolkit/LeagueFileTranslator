@@ -208,17 +208,22 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
             MDagPathArray influenceDagPaths = new MDagPathArray();
             uint influenceCount = skinCluster.influenceObjects(influenceDagPaths);
 
+            MGlobal.displayInfo("SKNFile:Create - Influence Count: " + influenceCount);
+
             //Get SKL Influence Indices
             MIntArray sklInfluenceIndices = new MIntArray(influenceCount);
             for (int i = 0; i < influenceCount; i++)
             {
                 MDagPath jointDagPath = influenceDagPaths[i];
 
+                MGlobal.displayInfo(jointDagPath.fullPathName);
+
                 //Loop through Joint DAG Paths, if we find a math for the influence, write the index
                 for (int j = 0; j < skl.JointDagPaths.Count; j++)
                 {
-                    if (jointDagPath == skl.JointDagPaths[j])
+                    if (jointDagPath.equalEqual(skl.JointDagPaths[j]))
                     {
+                        MGlobal.displayInfo("Found coresponding DAG path");
                         sklInfluenceIndices[i] = j;
                         break;
                     }

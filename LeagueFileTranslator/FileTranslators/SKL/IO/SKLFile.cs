@@ -79,8 +79,6 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
             int reservedOffset4 = br.ReadInt32();
             int reservedOffset5 = br.ReadInt32();
 
-            MGlobal.displayInfo(string.Format("{0} {1} {2} {3} {4}", jointCount, influencesCount, jointsOffset, influencesOffset, jointIndicesOffset));
-
             if (jointsOffset > 0 && jointCount != 0) //wesmart
             {
                 br.BaseStream.Seek(jointsOffset, SeekOrigin.Begin);
@@ -127,8 +125,6 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
 
                 MGlobal.displayInfo("SKNFile - Asset Name: " + this.AssetName);
             }
-
-            //SwitchHand();
         }
         private void ReadLegacy(BinaryReader br)
         {
@@ -258,7 +254,7 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 ikJoint.setObject(jointDagPath);
 
                 MTransformationMatrix local = new MTransformationMatrix(ikJoint.transformationMatrix);
-                MTransformationMatrix inverseGlobal = new MTransformationMatrix(jointDagPath.exclusiveMatrixInverse);
+                MTransformationMatrix inverseGlobal = new MTransformationMatrix(jointDagPath.inclusiveMatrixInverse);
 
                 this.Joints.Add(new SKLJoint(jointID, ikJoint.name, local, inverseGlobal));
                 this.JointIndices.Add(ELF.Hash(ikJoint.name), jointID);
