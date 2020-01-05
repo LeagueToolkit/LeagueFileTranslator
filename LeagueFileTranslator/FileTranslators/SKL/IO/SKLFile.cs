@@ -257,8 +257,8 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 this.JointDagPaths.Add(jointDagPath);
                 ikJoint.setObject(jointDagPath);
 
-                MTransformationMatrix local = new MTransformationMatrix(jointDagPath.exclusiveMatrix);
-                MTransformationMatrix inverseGlobal = new MTransformationMatrix(jointDagPath.inclusiveMatrixInverse);
+                MTransformationMatrix local = new MTransformationMatrix(ikJoint.transformationMatrix);
+                MTransformationMatrix inverseGlobal = new MTransformationMatrix(jointDagPath.exclusiveMatrixInverse);
 
                 this.Joints.Add(new SKLJoint(jointID, ikJoint.name, local, inverseGlobal));
                 this.JointIndices.Add(ELF.Hash(ikJoint.name), jointID);
@@ -279,10 +279,8 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                     //Find index of parent
                     for (int j = 0; j < this.JointDagPaths.Count; j++)
                     {
-                        MGlobal.displayInfo(parentDagPath.fullPathName);
                         if (parentDagPath.equalEqual(this.JointDagPaths[j]))
                         {
-                            MGlobal.displayInfo(string.Format("Found parent dag: [{0}] -> [{1}]", i, j));
                             this.Joints[i].ParentID = (short)j;
                         }
                     }
