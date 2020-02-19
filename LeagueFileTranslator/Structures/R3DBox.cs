@@ -29,5 +29,13 @@ namespace LeagueFileTranslator.Structures
             this.Min.Write(bw);
             this.Max.Write(bw);
         }
+
+        public Vector3 GetCentralPoint()
+        {
+            return new Vector3(
+                0.5f * (this.Min.X + this.Max.X),
+                0.5f * (this.Min.Y + this.Max.Y),
+                0.5f * (this.Min.Z + this.Max.Z));
+        }
     }
 }

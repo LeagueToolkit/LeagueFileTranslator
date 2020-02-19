@@ -106,8 +106,6 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                     short index = br.ReadInt16();
                     br.ReadInt16(); //pad
                     uint hash = br.ReadUInt32();
-
-                    MGlobal.displayInfo(string.Format("{0} {1}", hash, index));
                     this.JointIndices.Add(hash, index);
                 }
             }

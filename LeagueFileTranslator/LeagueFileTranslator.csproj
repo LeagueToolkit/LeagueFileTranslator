@@ -69,9 +69,12 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FileTranslators\SCB\IO\SCBFace.cs" />
-    <Compile Include="FileTranslators\SCB\IO\SCBFile.cs" />
-    <Compile Include="FileTranslators\SCB\SCBImporter.cs" />
+    <Compile Include="FileTranslators\StaticObject\Maya\SCOImporter.cs" />
+    <Compile Include="FileTranslators\StaticObject\StaticObjectFace.cs" />
+    <Compile Include="FileTranslators\StaticObject\StaticObject.cs" />
+    <Compile Include="FileTranslators\StaticObject\StaticObjectSubmesh.cs" />
+    <Compile Include="FileTranslators\StaticObject\StaticObjectVertex.cs" />
+    <Compile Include="FileTranslators\StaticObject\Maya\SCBImporter.cs" />
     <Compile Include="FileTranslators\SKL\IO\SKLFile.cs" />
     <Compile Include="FileTranslators\SKL\IO\SKLJoint.cs" />
     <Compile Include="FileTranslators\SKN\IO\SKNFile.cs" />
@@ -79,17 +82,18 @@
     <Compile Include="FileTranslators\SKN\IO\SKNVertex.cs" />
     <Compile Include="FileTranslators\SKN\SKNExporter.cs" />
     <Compile Include="FileTranslators\SKN\SKNImporter.cs" />
+    <Compile Include="Helpers\MaterialProvider.cs" />
+    <Compile Include="Helpers\MayaHelper.cs" />
     <Compile Include="LeagueFIleTranslatorPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Structures\ColorRGBAVector4Byte.cs" />
     <Compile Include="Structures\Quaternion.cs" />
     <Compile Include="Structures\R3DBox.cs" />
     <Compile Include="Structures\R3DMatrix.cs" />
     <Compile Include="Structures\R3DSphere.cs" />
+    <Compile Include="Structures\ColorRGBA4B.cs" />
     <Compile Include="Structures\Vector2.cs" />
     <Compile Include="Structures\Vector3.cs" />
-    <Compile Include="Structures\ColorRGBA4B.cs" />
-    <Compile Include="Structures\Vector3b.cs" />
-    <Compile Include="Structures\Vector4b.cs" />
     <Compile Include="Utilities\ELF.cs" />
     <Compile Include="Utilities\Text.cs" />
   </ItemGroup>
@@ -100,6 +104,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

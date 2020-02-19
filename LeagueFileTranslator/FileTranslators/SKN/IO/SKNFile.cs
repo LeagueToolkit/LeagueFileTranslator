@@ -2,6 +2,7 @@
 using Autodesk.Maya.OpenMayaAnim;
 using Autodesk.Maya.OpenMayaUI;
 using LeagueFileTranslator.FileTranslators.SKL.IO;
+using LeagueFileTranslator.Helpers;
 using LeagueFileTranslator.Structures;
 using System;
 using System.Collections.Generic;
@@ -19,21 +20,6 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
         public List<SKNVertex> Vertices { get; set; } = new List<SKNVertex>();
         public R3DBox BoundingBox { get; set; }
         public R3DSphere BoundingSphere { get; set; }
-
-        private static readonly List<MColor> MATERIAL_COLORS = new List<MColor>()
-        {
-            new MColor(MColor.MColorType.kRGB, 0.5f, 0.5f, 0.5f),
-            new MColor(MColor.MColorType.kRGB, 51, 230, 224),
-            new MColor(MColor.MColorType.kRGB, 51, 230, 129),
-            new MColor(MColor.MColorType.kRGB, 195, 230, 51),
-            new MColor(MColor.MColorType.kRGB, 230, 177, 51),
-            new MColor(MColor.MColorType.kRGB, 230, 63, 51),
-            new MColor(MColor.MColorType.kRGB, 230, 51, 171),
-            new MColor(MColor.MColorType.kRGB, 212, 51, 230),
-            new MColor(MColor.MColorType.kRGB, 99, 51, 230),
-            new MColor(MColor.MColorType.kRGB, 34, 88, 238),
-            new MColor(MColor.MColorType.kRGB, 0, 162, 255),
-        };
 
         public SKNFile(SKLFile skl)
         {
@@ -102,7 +88,6 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
         {
             Write(File.Create(fileLocation));
         }
-
         public void Write(Stream stream)
         {
             using (BinaryWriter bw = new BinaryWriter(stream))
@@ -141,6 +126,8 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
                 {
                     this.Vertices[i].Write(bw);
                 }
+
+                bw.Write(new byte[12]);
             }
         }
 
@@ -325,6 +312,8 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
                 byte[] weightIndices = new byte[4];
                 float[] vertexWeights = new float[4];
 
+                MGlobal.displayInfo("Vertex: " + index + " Positon: " + position.ToString());
+
                 //Normalize normals
                 for (int i = 0; i < normals.length; i++)
                 {
@@ -367,7 +356,7 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
                             float v = 0;
                             mesh.getUV(uvIndex, ref u, ref v);
 
-                            SKNVertex vertex = new SKNVertex(position, weightIndices, vertexWeights, normal, new Vector2(u, v));
+                            SKNVertex vertex = new SKNVertex(position, weightIndices, vertexWeights, normal, new Vector2(u, 1 - v));
                             vertex.UVIndex = uvIndex;
 
                             shaderVertices[shader].Add(vertex);
@@ -381,8 +370,6 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
                     throw new Exception("SKNFile:Create - Mesh contains a vertex with no UVs");
                 }
             }
-
-            MGlobal.displayInfo("1");
 
             //Convert from Maya indices to data indices
             int currentIndex = 0;
@@ -407,7 +394,7 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
 
                 this.Vertices.AddRange(shaderVertices[i]);
             }
-            MGlobal.displayInfo("2");
+
             MItMeshPolygon polygonIterator = new MItMeshPolygon(meshDagPath);
             for (polygonIterator.reset(); !polygonIterator.isDone; polygonIterator.next())
             {
@@ -472,7 +459,7 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
                     }
                 }
             }
-            MGlobal.displayInfo("3");
+
             uint startIndex = 0;
             uint startVertex = 0;
             for (int i = 0; i < shaderCount; i++)
@@ -621,17 +608,14 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
                 MObject shader = lambertShader.create(true);
 
                 lambertShader.setName(submesh.Name);
-                if (i < MATERIAL_COLORS.Count)
-                {
-                    lambertShader.color = MATERIAL_COLORS[i];
-                }
+                lambertShader.color = MaterialProvider.GetMayaColor(i);
 
                 MObject shadingEngine = dependencyNode.create("shadingEngine", submesh.Name + "_SG");
                 MObject materialInfo = dependencyNode.create("materialInfo", submesh.Name + "_MaterialInfo");
                 if (foundRenderPartition)
                 {
                     MPlug partitionPlug = new MFnDependencyNode(shadingEngine).findPlug("partition");
-                    MPlug setsPlug = FindFirstNotConnectedElement(renderPartition.findPlug("sets"));
+                    MPlug setsPlug = MayaHelper.FindFirstNotConnectedElement(renderPartition.findPlug("sets"));
                     modifier.connect(partitionPlug, setsPlug);
                 }
                 else
@@ -752,23 +736,6 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
                 mesh.updateSurface();
             }
 
-        }
-
-        private MPlug FindFirstNotConnectedElement(MPlug plug)
-        {
-            MPlug returnPlug = new MPlug();
-            MIntArray usedIndices = new MIntArray();
-
-            plug.getExistingArrayAttributeIndices(usedIndices);
-
-            uint i = 0;
-            do
-            {
-                returnPlug = plug.elementByLogicalIndex(i);
-                i++;
-            } while (returnPlug.isConnected);
-
-            return returnPlug;
         }
     }
 }
