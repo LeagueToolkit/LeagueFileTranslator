@@ -69,6 +69,11 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\MFloatPointArrayExtensions.cs" />
+    <Compile Include="Extensions\MFloatPointExtensions.cs" />
+    <Compile Include="Extensions\MFnMeshExtensions.cs" />
+    <Compile Include="FileTranslators\StaticObject\Maya\SCBExporter.cs" />
+    <Compile Include="FileTranslators\StaticObject\Maya\SCOExporter.cs" />
     <Compile Include="FileTranslators\StaticObject\Maya\SCOImporter.cs" />
     <Compile Include="FileTranslators\StaticObject\StaticObjectFace.cs" />
     <Compile Include="FileTranslators\StaticObject\StaticObject.cs" />
@@ -87,6 +92,7 @@
     <Compile Include="LeagueFIleTranslatorPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structures\ColorRGBAVector4Byte.cs" />
+    <Compile Include="Structures\MayaMeshData.cs" />
     <Compile Include="Structures\Quaternion.cs" />
     <Compile Include="Structures\R3DBox.cs" />
     <Compile Include="Structures\R3DMatrix.cs" />

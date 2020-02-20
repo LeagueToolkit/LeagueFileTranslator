@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using LeagueFileTranslator.Structures;
 using Autodesk.Maya.OpenMaya;
 using LeagueFileTranslator.Helpers;
+using LeagueFileTranslator.Extensions;
 
 namespace LeagueFileTranslator.FileTranslators.StaticObject
 {
@@ -40,7 +41,7 @@ namespace LeagueFileTranslator.FileTranslators.StaticObject
 
                 ushort major = br.ReadUInt16();
                 ushort minor = br.ReadUInt16();
-                if (major != 3 && major != 2 && minor != 1) //There are versions [2][1] and [1][1] aswell
+                if (major != 3 && major != 2 && minor != 1)
                 {
                     throw new Exception(string.Format("The Version: {0}.{1} is not supported", major, minor));
                 }
@@ -301,7 +302,7 @@ namespace LeagueFileTranslator.FileTranslators.StaticObject
                 sw.WriteLine("Name= " + this.Name);
                 sw.WriteLine("CentralPoint= " + GetCentralPoint().ToString());
 
-                if (this.PivotPoint != Vector3.Zero)
+                if (this.PivotPoint != null)
                 {
                     sw.WriteLine("PivotPoint= " + this.PivotPoint.ToString());
                 }
@@ -476,6 +477,80 @@ namespace LeagueFileTranslator.FileTranslators.StaticObject
             }
 
             mesh.updateSurface();
+        }
+
+        public static StaticObject Create()
+        {
+            MDagPath meshDagPath = new MDagPath();
+            MItSelectionList selectionIterator = MayaHelper.GetActiveSelectionListIterator(MFn.Type.kMesh);
+
+            selectionIterator.getDagPath(meshDagPath);
+            MFnMesh mesh = new MFnMesh(meshDagPath);
+
+            selectionIterator.next();
+            if (!selectionIterator.isDone)
+            {
+                MGlobal.displayError("StaticObject:Create - More than 1 mesh is selected");
+                throw new Exception("StaticObject:Create - More than 1 mesh is selected");
+            }
+
+            if (!mesh.IsTriangulated())
+            {
+                MGlobal.displayError("StaticObject:Create - Mesh isn't triangulated");
+                throw new Exception("StaticObject:Create - Mesh isn't triangulated");
+            }
+            if (mesh.ContainsHoles())
+            {
+                MGlobal.displayError("StaticObject:Create - Mesh Contains holes");
+                throw new Exception("StaticObject:Create - Mesh Contains holes");
+            }
+
+            MayaMeshData meshData = mesh.GetMeshData();
+            Dictionary<int, string> shaderNames = new Dictionary<int, string>();
+            List<StaticObjectFace> faces = new List<StaticObjectFace>();
+
+            //Build Shader Name map
+            for (int i = 0; i < meshData.ShaderIndices.Count; i++)
+            {
+                int shaderIndex = meshData.ShaderIndices[i];
+
+                if (!shaderNames.ContainsKey(shaderIndex))
+                {
+                    MPlug shaderPlug = new MFnDependencyNode(meshData.Shaders[shaderIndex]).findPlug("surfaceShader");
+                    MPlugArray plugArray = new MPlugArray();
+
+                    shaderPlug.connectedTo(plugArray, true, false);
+
+                    MFnDependencyNode material = new MFnDependencyNode(shaderPlug[0].node);
+
+                    shaderNames.Add(shaderIndex, material.name);
+                }
+            }
+
+            //Construct faces
+            int currentIndex = 0;
+            for (int polygonIndex = 0; polygonIndex < mesh.numPolygons; polygonIndex++)
+            {
+                int shaderIndex = meshData.ShaderIndices[polygonIndex];
+                uint[] faceIndices =
+                {
+                    (uint)meshData.TriangleVertices[currentIndex],
+                    (uint)meshData.TriangleVertices[currentIndex + 1],
+                    (uint)meshData.TriangleVertices[currentIndex + 2]
+                };
+                Vector2[] uvs =
+                {
+                    new Vector2(meshData.UArray[currentIndex], 1 - meshData.VArray[currentIndex]),
+                    new Vector2(meshData.UArray[currentIndex + 1], 1 - meshData.VArray[currentIndex + 1]),
+                    new Vector2(meshData.UArray[currentIndex + 2], 1 - meshData.VArray[currentIndex + 2])
+                };
+
+
+                faces.Add(new StaticObjectFace(faceIndices, shaderNames[shaderIndex], uvs));
+                currentIndex += 3;
+            }
+
+            return new StaticObject(CreateSubmeshes(meshData.VertexArray.ToVector3List(), new List<ColorRGBA4B>(), faces));
         }
     }
 

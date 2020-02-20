@@ -11,12 +11,8 @@ namespace LeagueFileTranslator.Helpers
     {
         public static MPlug FindFirstNotConnectedElement(MPlug plug)
         {
-            MPlug returnPlug = new MPlug();
-            MIntArray usedIndices = new MIntArray();
-
-            plug.getExistingArrayAttributeIndices(usedIndices);
-
             uint i = 0;
+            MPlug returnPlug;
             do
             {
                 returnPlug = plug.elementByLogicalIndex(i);
@@ -41,6 +37,21 @@ namespace LeagueFileTranslator.Helpers
             }
 
             return renderPartition;
+        }
+
+        public static MItSelectionList GetActiveSelectionListIterator()
+        {
+            MSelectionList selectionList = new MSelectionList();
+            MGlobal.getActiveSelectionList(selectionList);
+
+            return new MItSelectionList(selectionList);
+        }
+        public static MItSelectionList GetActiveSelectionListIterator(MFn.Type type)
+        {
+            MSelectionList selectionList = new MSelectionList();
+            MGlobal.getActiveSelectionList(selectionList);
+
+            return new MItSelectionList(selectionList, type);
         }
     }
 }

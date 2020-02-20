@@ -312,7 +312,7 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
                 byte[] weightIndices = new byte[4];
                 float[] vertexWeights = new float[4];
 
-                MGlobal.displayInfo("Vertex: " + index + " Positon: " + position.ToString());
+                meshVertexIterator.getNormals(normals);
 
                 //Normalize normals
                 for (int i = 0; i < normals.length; i++)
