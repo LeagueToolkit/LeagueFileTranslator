@@ -9,7 +9,7 @@ using LeagueFileTranslator.FileTranslators.SKL.IO;
 using LeagueFileTranslator.FileTranslators.SKN;
 using LeagueFileTranslator.FileTranslators.SKN.IO;
 
-[assembly: MPxFileTranslatorClass(typeof(SKNImporter), "SKNImporter", null, "", "")]
+[assembly: MPxFileTranslatorClass(typeof(SKNImporter), "SKN Importer", null, "", "")]
 namespace LeagueFileTranslator.FileTranslators.SKN
 {
     public class SKNImporter : MPxFileTranslator
