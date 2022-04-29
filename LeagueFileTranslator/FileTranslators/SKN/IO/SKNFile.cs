@@ -46,26 +46,27 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
                     throw new Exception("SKNFile.Read: Unsupported SKN version: " + major + "." + minor);
                 }
 
-                uint submeshCount = br.ReadUInt32();
-                for (int i = 0; i < submeshCount; i++)
+                if (major != 0)
                 {
-                    this.Submeshes.Add(new SKNSubmesh(br));
-                }
+                    uint submeshCount = br.ReadUInt32();
+                    for (int i = 0; i < submeshCount; i++)
+                    {
+                        this.Submeshes.Add(new SKNSubmesh(br));
+                    }
 
-                uint flags = 0;
-                if (major == 4)
-                {
-                    flags = br.ReadUInt32();
+                    if (major == 4)
+                    {
+                        uint flags = br.ReadUInt32();
+                    }
                 }
 
                 uint indexCount = br.ReadUInt32();
                 uint vertexCount = br.ReadUInt32();
 
-                uint vertexSize = 52;
                 SKNVertexType vertexType = SKNVertexType.Basic;
                 if (major == 4)
                 {
-                    vertexSize = br.ReadUInt32();
+                    uint vertexSize = br.ReadUInt32();
                     vertexType = (SKNVertexType)br.ReadUInt32();
                     this.BoundingBox = new R3DBox(br);
                     this.BoundingSphere = new R3DSphere(br);
