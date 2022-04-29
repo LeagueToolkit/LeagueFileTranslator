@@ -134,8 +134,8 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
 
         public void CalculateBoundaries()
         {
-            Vector3 min = this.Vertices[0].Position;
-            Vector3 max = this.Vertices[0].Position;
+            Vector3 min = Vector3.Infinity;
+            Vector3 max = Vector3.NegativeInfinity;
 
             foreach (SKNVertex vertex in this.Vertices)
             {
