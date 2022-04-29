@@ -181,12 +181,12 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                 bw.Write(this.Influences.Count);
 
                 int jointsSectionSize = this.Joints.Count * 100;
+                int jointIndicesSectionSize = this.JointIndices.Count * 8;
                 int influencesSectionSize = this.Influences.Count * 2;
-                int jointIndicesSectonSize = this.JointIndices.Count * 8;
                 int jointsOffset = 64;
-                int influencesOffset = jointsOffset + jointsSectionSize;
-                int jointIndicesOffset = influencesOffset + influencesSectionSize;
-                int jointNamesOffset = jointIndicesOffset + jointIndicesSectonSize;
+                int jointIndicesOffset = jointsOffset + jointsSectionSize;
+                int influencesOffset = jointIndicesOffset + jointIndicesSectionSize;
+                int jointNamesOffset = influencesOffset + influencesSectionSize;
 
                 bw.Write(jointsOffset); //Joints Offset
                 bw.Write(jointIndicesOffset);
@@ -230,7 +230,7 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                     bw.Write(jointIndex.Key);
                 }
 
-                uint fileSize = (uint)bw.BaseStream.Position - 4;
+                uint fileSize = (uint)bw.BaseStream.Length;
                 bw.BaseStream.Seek(0, SeekOrigin.Begin);
                 bw.Write(fileSize);
             }
