@@ -98,7 +98,7 @@ namespace LeagueFileTranslator.Structures
                 format += '\n';
             }
 
-            sw.Write(string.Format(format, this.X, this.Y, this.Z));
+            sw.Write(string.Format(NumberFormatInfo.InvariantInfo, format, this.X, this.Y, this.Z));
         }
 
         /// <summary>
