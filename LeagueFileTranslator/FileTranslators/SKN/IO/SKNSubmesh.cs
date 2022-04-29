@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LeagueFileTranslator.Utilities;
 
 namespace LeagueFileTranslator.FileTranslators.SKN.IO
 {
@@ -26,7 +27,7 @@ namespace LeagueFileTranslator.FileTranslators.SKN.IO
 
         public SKNSubmesh(BinaryReader br)
         {
-            this.Name = Encoding.ASCII.GetString(br.ReadBytes(64)).Replace("\0", "");
+            this.Name = Text.ReadPaddedString(br, 64);
             this.StartVertex = br.ReadUInt32();
             this.VertexCount = br.ReadUInt32();
             this.StartIndex = br.ReadUInt32();

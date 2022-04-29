@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LeagueFileTranslator.Structures;
+using LeagueFileTranslator.Utilities;
 
 namespace LeagueFileTranslator.FileTranslators.StaticObject
 {
@@ -24,7 +25,7 @@ namespace LeagueFileTranslator.FileTranslators.StaticObject
         public StaticObjectFace(BinaryReader br)
         {
             this.Indices = new uint[] { br.ReadUInt32(), br.ReadUInt32(), br.ReadUInt32() };
-            this.Material = Encoding.ASCII.GetString(br.ReadBytes(64)).Replace("\0", "");
+            this.Material = Text.ReadPaddedString(br, 64);
 
             float[] uvs = new float[] { br.ReadSingle(), br.ReadSingle(), br.ReadSingle(), br.ReadSingle(), br.ReadSingle(), br.ReadSingle() };
             this.UVs = new Vector2[]

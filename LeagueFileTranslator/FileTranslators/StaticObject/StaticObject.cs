@@ -8,6 +8,7 @@ using LeagueFileTranslator.Structures;
 using Autodesk.Maya.OpenMaya;
 using LeagueFileTranslator.Helpers;
 using LeagueFileTranslator.Extensions;
+using LeagueFileTranslator.Utilities;
 
 namespace LeagueFileTranslator.FileTranslators.StaticObject
 {
@@ -46,7 +47,7 @@ namespace LeagueFileTranslator.FileTranslators.StaticObject
                     throw new Exception(string.Format("The Version: {0}.{1} is not supported", major, minor));
                 }
 
-                string name = Encoding.ASCII.GetString(br.ReadBytes(128)).Replace("\0", "");
+                string name = Text.ReadPaddedString(br, 128);
                 uint vertexCount = br.ReadUInt32();
                 uint faceCount = br.ReadUInt32();
                 StaticObjectFlags flags = (StaticObjectFlags)br.ReadUInt32();

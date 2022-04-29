@@ -44,7 +44,7 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
             if (isLegacy)
             {
                 this.ID = id;
-                this.Name = Encoding.ASCII.GetString(br.ReadBytes(32)).Replace("\0", "");
+                this.Name = Text.ReadPaddedString(br, 32);
                 this.ParentID = (short)br.ReadInt32();
                 float scale = br.ReadSingle();
                 float[,] transform = new float[4, 4];

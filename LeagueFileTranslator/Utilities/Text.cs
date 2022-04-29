@@ -9,6 +9,11 @@ namespace LeagueFileTranslator.Utilities
 {
     public static class Text
     {
+        public static string ReadPaddedString(BinaryReader br, int length)
+        {
+            return Encoding.ASCII.GetString(br.ReadBytes(length).TakeWhile(b => !b.Equals(0)).ToArray());
+        }
+        
         public static string ReadZeroTerminatedString(BinaryReader br)
         {
             string returnString = "";
