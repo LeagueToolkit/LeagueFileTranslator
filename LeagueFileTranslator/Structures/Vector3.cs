@@ -76,7 +76,7 @@ namespace LeagueFileTranslator.Structures
         }
 
         /// <summary>
-        /// Writes this <see cref="Vector4"/> into a <see cref="BinaryWriter"/>
+        /// Writes this <see cref="Vector3"/> into a <see cref="BinaryWriter"/>
         /// </summary>
         /// <param name="bw">The <see cref="BinaryWriter"/> to write to</param>
         public void Write(BinaryWriter bw)
@@ -143,7 +143,7 @@ namespace LeagueFileTranslator.Structures
 
         public bool Equals(Vector3 other)
         {
-            return (this.X == other.X) && (this.Y == other.Y) && (this.Z == other.Z);
+            return other != null && (this.X == other.X) && (this.Y == other.Y) && (this.Z == other.Z);
         }
         public override string ToString()
         {
@@ -157,14 +157,6 @@ namespace LeagueFileTranslator.Structures
         public static Vector3 operator -(Vector3 x, Vector3 y)
         {
             return new Vector3(x.X - y.X, x.Y - y.Y, x.Z - y.Z);
-        }
-        public static bool operator ==(Vector3 x, Vector3 y)
-        {
-            return x.Equals(y);
-        }
-        public static bool operator !=(Vector3 x, Vector3 y)
-        {
-            return !x.Equals(y);
         }
     }
 }
