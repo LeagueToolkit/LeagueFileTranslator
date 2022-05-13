@@ -207,6 +207,7 @@ namespace LeagueFileTranslator.FileTranslators.SKL.IO
                     jointNameOffsets.Add(i, (int)bw.BaseStream.Position);
 
                     bw.Write(Encoding.ASCII.GetBytes(this.Joints[i].Name));
+                    bw.Seek((int)(3 - bw.BaseStream.Position % 4), SeekOrigin.Current);
                     bw.Write((byte)0);
                 }
 
